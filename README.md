@@ -100,9 +100,19 @@ En Netlify:
 	- `TELEGRAM_CHAT_ID`
 	- `INSTAGRAM_USERNAME` (sin `@`)
 	- `SEND_ON_FIRST_RUN=false` (recomendado)
+	- `DASHBOARD_TOKEN=tu_clave_privada` (opcional, recomendado para proteger dashboard)
 5. Deploy.
 
 La función programada corre cada 5 minutos y solo envía si detecta un post nuevo.
+
+## Dashboard web en Netlify
+
+Después del deploy, abre la raíz del sitio de Netlify (`/`).
+
+- Botón **Actualizar estado**: consulta configuración y último resultado.
+- Botón **Ejecutar revisión ahora**: fuerza una revisión inmediata del perfil.
+
+Si configuras `DASHBOARD_TOKEN`, escríbelo en el campo del dashboard para autorizar llamadas.
 
 ### Nota de estado en Netlify
 

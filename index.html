@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Instagram Bot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 760px;
+        margin: 30px auto;
+        padding: 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      input, button {
+        padding: 10px;
+        font-size: 14px;
+      }
+      input {
+        flex: 1;
+        min-width: 260px;
+      }
+      button {
+        cursor: pointer;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 12px;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: #f7f7f7;
+        border-radius: 6px;
+        padding: 10px;
+      }
+      .muted {
+        color: #666;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dashboard Instagram → Telegram</h1>
+    <p class="muted">Estado del bot y ejecución manual de revisión.</p>
+
+    <div class="row">
+      <input id="token" placeholder="DASHBOARD_TOKEN (opcional)" />
+      <button id="saveToken">Guardar token</button>
+    </div>
+
+    <div class="row">
+      <button id="refresh">Actualizar estado</button>
+      <button id="runNow">Ejecutar revisión ahora</button>
+    </div>
+
+    <div class="card">
+      <h3>Respuesta</h3>
+      <pre id="output">Sin datos todavía.</pre>
+    </div>
+
+    <script>
+      const output = document.getElementById("output");
+      const tokenInput = document.getElementById("token");
+
+      tokenInput.value = localStorage.getItem("dashboard_token") || "";
+
+      function getHeaders() {
+        const token = localStorage.getItem("dashboard_token") || "";
+        const headers = { "content-type": "application/json" };
+        if (token) {
+          headers["x-dashboard-token"] = token;
+        }
+        return headers;
+      }
+
+      async function callApi(url, options = {}) {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            ...getHeaders(),
+            ...(options.headers || {})
+          }
+        });
+        const text = await response.text();
+        let parsed = text;
+        try {
+          parsed = JSON.parse(text);
+        } catch (_) {}
+
+        output.textContent = JSON.stringify(
+          {
+            status: response.status,
+            data: parsed
+          },
+          null,
+          2
+        );
+      }
+
+      document.getElementById("saveToken").addEventListener("click", () => {
+        localStorage.setItem("dashboard_token", tokenInput.value.trim());
+        output.textContent = "Token guardado en el navegador.";
+      });
+
+      document.getElementById("refresh").addEventListener("click", async () => {
+        await callApi("/.netlify/functions/dashboard-status");
+      });
+
+      document.getElementById("runNow").addEventListener("click", async () => {
+        await callApi("/.netlify/functions/dashboard-run", { method: "POST" });
+      });
+    </script>
+  </body>
+</html>
