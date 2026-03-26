@@ -371,9 +371,44 @@ async function getStatus() {
   };
 }
 
+async function runTestMessage() {
+  const config = getConfig();
+  if (config.missing.length) {
+    return {
+      statusCode: 500,
+      payload: { ok: false, error: `Faltan variables: ${config.missing.join(", ")}` }
+    };
+  }
+
+  const now = new Date().toISOString();
+  const message = [
+    "✅ Mensaje de prueba del bot Instagram → Telegram",
+    `Cuenta monitoreada: @${config.instagramUsername}`,
+    `Fecha: ${now}`
+  ].join("\n");
+
+  try {
+    await sendTelegramMessage({ token: config.token, chatId: config.chatId, text: message });
+    return {
+      statusCode: 200,
+      payload: {
+        ok: true,
+        state: "test_sent",
+        message: "Mensaje de prueba enviado correctamente"
+      }
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      payload: { ok: false, error: `Error: ${error.message}` }
+    };
+  }
+}
+
 module.exports = {
   getConfig,
   getStatus,
+  runTestMessage,
   runCheck,
   validateDashboardAuth
 };

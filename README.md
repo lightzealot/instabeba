@@ -114,6 +114,7 @@ Después del deploy, abre la raíz del sitio de Netlify (`/`).
 
 - Botón **Actualizar estado**: consulta configuración y último resultado.
 - Botón **Ejecutar revisión ahora**: fuerza una revisión inmediata del perfil.
+- Botón **Enviar mensaje de prueba**: envía un mensaje inmediato al chat/grupo configurado.
 
 Si configuras `DASHBOARD_TOKEN`, escríbelo en el campo del dashboard para autorizar llamadas.
 

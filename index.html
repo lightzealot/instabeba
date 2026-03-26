@@ -59,6 +59,7 @@
     <div class="row">
       <button id="refresh">Actualizar estado</button>
       <button id="runNow">Ejecutar revisión ahora</button>
+      <button id="sendTest">Enviar mensaje de prueba</button>
     </div>
 
     <div class="card">
@@ -116,6 +117,10 @@
 
       document.getElementById("runNow").addEventListener("click", async () => {
         await callApi("/.netlify/functions/dashboard-run", { method: "POST" });
+      });
+
+      document.getElementById("sendTest").addEventListener("click", async () => {
+        await callApi("/.netlify/functions/dashboard-test", { method: "POST" });
       });
     </script>
   </body>
