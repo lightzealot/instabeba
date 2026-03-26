@@ -80,6 +80,12 @@ async function fetchLatestPost(username) {
     }
   );
 
+  if (response.status === 429) {
+    const error = new Error("Instagram HTTP 429");
+    error.code = "INSTAGRAM_RATE_LIMIT";
+    throw error;
+  }
+
   if (!response.ok) {
     throw new Error(`Instagram HTTP ${response.status}`);
   }
@@ -129,8 +135,17 @@ function getStoreKeys(username) {
   return {
     lastShortcode: `${username}:last_shortcode`,
     lastResult: `${username}:last_result`,
-    lastCheckedAt: `${username}:last_checked_at`
+    lastCheckedAt: `${username}:last_checked_at`,
+    rateLimitedUntil: `${username}:rate_limited_until`
   };
+}
+
+function getRateLimitCooldownMinutes() {
+  const value = Number.parseInt(process.env.RATE_LIMIT_COOLDOWN_MINUTES || "30", 10);
+  if (Number.isNaN(value) || value < 1) {
+    return 30;
+  }
+  return value;
 }
 
 function getStateStore() {
@@ -183,6 +198,28 @@ async function runCheck() {
   const keys = getStoreKeys(config.instagramUsername);
 
   try {
+    const rateLimitedUntilRaw = await store.get(keys.rateLimitedUntil, { type: "text" });
+    if (rateLimitedUntilRaw) {
+      const rateLimitedUntil = new Date(rateLimitedUntilRaw);
+      if (!Number.isNaN(rateLimitedUntil.getTime()) && rateLimitedUntil.getTime() > Date.now()) {
+        await store.set(
+          keys.lastResult,
+          `Instagram con rate limit activo hasta ${rateLimitedUntil.toISOString()}`
+        );
+        await store.set(keys.lastCheckedAt, new Date().toISOString());
+        return {
+          statusCode: 200,
+          payload: {
+            ok: false,
+            state: "rate_limited",
+            message: `Instagram con rate limit activo hasta ${rateLimitedUntil.toISOString()}`,
+            rateLimitedUntil: rateLimitedUntil.toISOString()
+          }
+        };
+      }
+      await store.delete(keys.rateLimitedUntil);
+    }
+
     const latestPost = await fetchLatestPost(config.instagramUsername);
     if (!latestPost) {
       await store.set(keys.lastResult, "Sin publicaciones para procesar");
@@ -249,6 +286,23 @@ async function runCheck() {
       }
     };
   } catch (error) {
+    if (error.code === "INSTAGRAM_RATE_LIMIT") {
+      const cooldownMinutes = getRateLimitCooldownMinutes();
+      const rateLimitedUntil = new Date(Date.now() + cooldownMinutes * 60 * 1000).toISOString();
+      await store.set(keys.rateLimitedUntil, rateLimitedUntil);
+      await store.set(keys.lastResult, `Instagram con rate limit (429). Reintento en ${cooldownMinutes} min`);
+      await store.set(keys.lastCheckedAt, new Date().toISOString());
+      return {
+        statusCode: 200,
+        payload: {
+          ok: false,
+          state: "rate_limited",
+          message: `Instagram con rate limit (429). Reintento en ${cooldownMinutes} min`,
+          rateLimitedUntil
+        }
+      };
+    }
+
     await store.set(keys.lastResult, `Error: ${error.message}`);
     await store.set(keys.lastCheckedAt, new Date().toISOString());
 
@@ -303,13 +357,16 @@ async function getStatus() {
     store.get(keys.lastCheckedAt, { type: "text" })
   ]);
 
+  const rateLimitedUntil = await store.get(keys.rateLimitedUntil, { type: "text" });
+
   return {
     statusCode: 200,
     payload: {
       ...base,
       lastShortcode: lastShortcode || null,
       lastResult: lastResult || null,
-      lastCheckedAt: lastCheckedAt || null
+      lastCheckedAt: lastCheckedAt || null,
+      rateLimitedUntil: rateLimitedUntil || null
     }
   };
 }
