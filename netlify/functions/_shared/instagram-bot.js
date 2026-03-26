@@ -135,16 +135,25 @@ function getStoreKeys(username) {
 
 function getStateStore() {
   const siteID = (process.env.NETLIFY_BLOBS_SITE_ID || process.env.NETLIFY_SITE_ID || "").trim();
-  const token = (process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_API_TOKEN || "").trim();
+  const token = (
+    process.env.NETLIFY_BLOBS_TOKEN ||
+    process.env.NETLIFY_API_TOKEN ||
+    process.env.NETLIFY_AUTH_TOKEN ||
+    process.env.NETLIFY_TOKEN ||
+    ""
+  ).trim();
+
+  if (!siteID || !token) {
+    throw new Error(
+      `Blobs no configurado: NETLIFY_BLOBS_SITE_ID=${siteID ? "ok" : "missing"}, NETLIFY_BLOBS_TOKEN=${token ? "ok" : "missing"}`
+    );
+  }
 
   try {
-    if (siteID && token) {
-      return getStore("instagram-bot-state", { siteID, token });
-    }
-    return getStore("instagram-bot-state");
+    return getStore("instagram-bot-state", { siteID, token });
   } catch (error) {
     throw new Error(
-      "No se pudo inicializar Netlify Blobs. Configura NETLIFY_BLOBS_SITE_ID y NETLIFY_BLOBS_TOKEN en Netlify."
+      `No se pudo inicializar Netlify Blobs: ${error.message}`
     );
   }
 }
