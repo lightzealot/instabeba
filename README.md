@@ -101,6 +101,9 @@ En Netlify:
 	- `INSTAGRAM_USERNAME` (sin `@`)
 	- `SEND_ON_FIRST_RUN=false` (recomendado)
 	- `DASHBOARD_TOKEN=tu_clave_privada` (opcional, recomendado para proteger dashboard)
+	- Si ves error de Blobs, agrega también:
+	  - `NETLIFY_BLOBS_SITE_ID`
+	  - `NETLIFY_BLOBS_TOKEN` (token personal de Netlify API)
 5. Deploy.
 
 La función programada corre cada 5 minutos y solo envía si detecta un post nuevo.
@@ -118,6 +121,7 @@ Si configuras `DASHBOARD_TOKEN`, escríbelo en el campo del dashboard para autor
 
 En Netlify el estado se guarda en Blobs (clave por usuario), por eso no depende de `state.json`.
 Para Netlify no necesitas `POLL_SECONDS` ni `STATE_FILE`.
+Si tu entorno no inyecta Blobs automáticamente, usa `NETLIFY_BLOBS_SITE_ID` y `NETLIFY_BLOBS_TOKEN`.
 
 ## Persistencia de estado en cloud
 

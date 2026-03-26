@@ -133,6 +133,22 @@ function getStoreKeys(username) {
   };
 }
 
+function getStateStore() {
+  const siteID = (process.env.NETLIFY_BLOBS_SITE_ID || process.env.NETLIFY_SITE_ID || "").trim();
+  const token = (process.env.NETLIFY_BLOBS_TOKEN || process.env.NETLIFY_API_TOKEN || "").trim();
+
+  try {
+    if (siteID && token) {
+      return getStore("instagram-bot-state", { siteID, token });
+    }
+    return getStore("instagram-bot-state");
+  } catch (error) {
+    throw new Error(
+      "No se pudo inicializar Netlify Blobs. Configura NETLIFY_BLOBS_SITE_ID y NETLIFY_BLOBS_TOKEN en Netlify."
+    );
+  }
+}
+
 async function runCheck() {
   const config = getConfig();
   if (config.missing.length) {
@@ -142,7 +158,15 @@ async function runCheck() {
     };
   }
 
-  const store = getStore("instagram-bot-state");
+  let store;
+  try {
+    store = getStateStore();
+  } catch (error) {
+    return {
+      statusCode: 500,
+      payload: { ok: false, error: error.message }
+    };
+  }
   const keys = getStoreKeys(config.instagramUsername);
 
   try {
@@ -243,7 +267,22 @@ async function getStatus() {
     };
   }
 
-  const store = getStore("instagram-bot-state");
+  let store;
+  try {
+    store = getStateStore();
+  } catch (error) {
+    return {
+      statusCode: 200,
+      payload: {
+        ...base,
+        ok: false,
+        storageError: error.message,
+        lastShortcode: null,
+        lastResult: null,
+        lastCheckedAt: null
+      }
+    };
+  }
   const keys = getStoreKeys(config.instagramUsername);
   const [lastShortcode, lastResult, lastCheckedAt] = await Promise.all([
     store.get(keys.lastShortcode, { type: "text" }),
