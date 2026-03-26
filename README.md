@@ -100,6 +100,7 @@ En Netlify:
 	- `TELEGRAM_CHAT_ID`
 	- `INSTAGRAM_USERNAME` (sin `@`)
 	- `SEND_ON_FIRST_RUN=false` (recomendado)
+	- `RATE_LIMIT_COOLDOWN_MINUTES=30` (opcional, base para reintentos cuando Instagram responde 429)
 	- `DASHBOARD_TOKEN=tu_clave_privada` (opcional, recomendado para proteger dashboard)
 	- Si ves error de Blobs, agrega también:
 	  - `NETLIFY_BLOBS_SITE_ID`

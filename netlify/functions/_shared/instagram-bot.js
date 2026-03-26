@@ -19,6 +19,52 @@ function truncate(value, max) {
   return `${value.slice(0, max - 3)}...`;
 }
 
+function parseRetryAfterSeconds(headerValue) {
+  if (!headerValue) {
+    return null;
+  }
+
+  const raw = String(headerValue).trim();
+  if (!raw) {
+    return null;
+  }
+
+  const numeric = Number.parseInt(raw, 10);
+  if (!Number.isNaN(numeric) && numeric >= 0) {
+    return numeric;
+  }
+
+  const dateMillis = Date.parse(raw);
+  if (Number.isNaN(dateMillis)) {
+    return null;
+  }
+
+  const seconds = Math.ceil((dateMillis - Date.now()) / 1000);
+  return seconds > 0 ? seconds : 0;
+}
+
+function normalizeLatestPostFromProfileInfo(data) {
+  const edges = data?.data?.user?.edge_owner_to_timeline_media?.edges || [];
+  if (!edges.length) {
+    return null;
+  }
+
+  const node = edges[0].node;
+  const shortcode = node?.shortcode;
+  if (!shortcode) {
+    return null;
+  }
+
+  const caption =
+    node?.edge_media_to_caption?.edges?.[0]?.node?.text?.replace(/\n/g, " ").trim() || "";
+
+  return {
+    shortcode,
+    caption: truncate(caption, 180),
+    postUrl: `https://www.instagram.com/p/${shortcode}/`
+  };
+}
+
 function getConfig() {
   const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
   const chatId = (process.env.TELEGRAM_CHAT_ID || "").trim();
@@ -70,46 +116,57 @@ function validateDashboardAuth(event) {
 }
 
 async function fetchLatestPost(username) {
-  const response = await fetch(
-    `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`,
-    {
-      headers: {
-        "x-ig-app-id": INSTAGRAM_APP_ID,
-        "user-agent": "Mozilla/5.0"
-      }
-    }
-  );
+  const encodedUsername = encodeURIComponent(username);
+  const profileUrl = `https://www.instagram.com/${encodedUsername}/`;
+  const commonHeaders = {
+    "x-ig-app-id": INSTAGRAM_APP_ID,
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    accept: "*/*",
+    referer: profileUrl,
+    "accept-language": "es-ES,es;q=0.9,en;q=0.8"
+  };
 
-  if (response.status === 429) {
+  const candidates = [
+    `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodedUsername}`,
+    `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodedUsername}`
+  ];
+
+  let lastError = null;
+  let maxRetryAfterSeconds = null;
+
+  for (const url of candidates) {
+    const response = await fetch(url, { headers: commonHeaders });
+
+    if (response.status === 429) {
+      const retryAfterSeconds = parseRetryAfterSeconds(response.headers.get("retry-after"));
+      if (retryAfterSeconds !== null) {
+        maxRetryAfterSeconds =
+          maxRetryAfterSeconds === null
+            ? retryAfterSeconds
+            : Math.max(maxRetryAfterSeconds, retryAfterSeconds);
+      }
+      continue;
+    }
+
+    if (!response.ok) {
+      lastError = new Error(`Instagram HTTP ${response.status}`);
+      continue;
+    }
+
+    const data = await response.json();
+    return normalizeLatestPostFromProfileInfo(data);
+  }
+
+  if (maxRetryAfterSeconds !== null || !lastError) {
     const error = new Error("Instagram HTTP 429");
     error.code = "INSTAGRAM_RATE_LIMIT";
+    if (maxRetryAfterSeconds !== null) {
+      error.retryAfterSeconds = maxRetryAfterSeconds;
+    }
     throw error;
   }
 
-  if (!response.ok) {
-    throw new Error(`Instagram HTTP ${response.status}`);
-  }
-
-  const data = await response.json();
-  const edges = data?.data?.user?.edge_owner_to_timeline_media?.edges || [];
-  if (!edges.length) {
-    return null;
-  }
-
-  const node = edges[0].node;
-  const shortcode = node?.shortcode;
-  if (!shortcode) {
-    return null;
-  }
-
-  const caption =
-    node?.edge_media_to_caption?.edges?.[0]?.node?.text?.replace(/\n/g, " ").trim() || "";
-
-  return {
-    shortcode,
-    caption: truncate(caption, 180),
-    postUrl: `https://www.instagram.com/p/${shortcode}/`
-  };
+  throw lastError;
 }
 
 async function sendTelegramMessage({ token, chatId, text }) {
@@ -136,7 +193,8 @@ function getStoreKeys(username) {
     lastShortcode: `${username}:last_shortcode`,
     lastResult: `${username}:last_result`,
     lastCheckedAt: `${username}:last_checked_at`,
-    rateLimitedUntil: `${username}:rate_limited_until`
+    rateLimitedUntil: `${username}:rate_limited_until`,
+    rateLimitCount: `${username}:rate_limit_count`
   };
 }
 
@@ -221,6 +279,7 @@ async function runCheck() {
     }
 
     const latestPost = await fetchLatestPost(config.instagramUsername);
+    await store.delete(keys.rateLimitCount);
     if (!latestPost) {
       await store.set(keys.lastResult, "Sin publicaciones para procesar");
       await store.set(keys.lastCheckedAt, new Date().toISOString());
@@ -287,9 +346,21 @@ async function runCheck() {
     };
   } catch (error) {
     if (error.code === "INSTAGRAM_RATE_LIMIT") {
-      const cooldownMinutes = getRateLimitCooldownMinutes();
+      const baseCooldownMinutes = getRateLimitCooldownMinutes();
+      const previousCountRaw = await store.get(keys.rateLimitCount, { type: "text" });
+      const previousCount = Number.parseInt(previousCountRaw || "0", 10);
+      const nextCount = Number.isNaN(previousCount) || previousCount < 0 ? 1 : previousCount + 1;
+
+      const retryAfterMinutes =
+        Number.isFinite(error.retryAfterSeconds) && error.retryAfterSeconds >= 0
+          ? Math.ceil(error.retryAfterSeconds / 60)
+          : 0;
+      const exponentialMinutes = Math.min(baseCooldownMinutes * 2 ** (nextCount - 1), 24 * 60);
+      const cooldownMinutes = Math.max(baseCooldownMinutes, retryAfterMinutes, exponentialMinutes);
       const rateLimitedUntil = new Date(Date.now() + cooldownMinutes * 60 * 1000).toISOString();
+
       await store.set(keys.rateLimitedUntil, rateLimitedUntil);
+      await store.set(keys.rateLimitCount, String(nextCount));
       await store.set(keys.lastResult, `Instagram con rate limit (429). Reintento en ${cooldownMinutes} min`);
       await store.set(keys.lastCheckedAt, new Date().toISOString());
       return {
