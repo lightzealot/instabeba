@@ -150,11 +150,15 @@ function getStateStore() {
   }
 
   try {
-    return getStore("instagram-bot-state", { siteID, token });
-  } catch (error) {
-    throw new Error(
-      `No se pudo inicializar Netlify Blobs: ${error.message}`
-    );
+    return getStore({ name: "instagram-bot-state", siteID, token });
+  } catch (firstError) {
+    try {
+      return getStore("instagram-bot-state", { siteID, token });
+    } catch (secondError) {
+      throw new Error(
+        `No se pudo inicializar Netlify Blobs: ${secondError.message || firstError.message}`
+      );
+    }
   }
 }
 
