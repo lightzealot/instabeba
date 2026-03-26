@@ -106,7 +106,7 @@ En Netlify:
 	  - `NETLIFY_BLOBS_TOKEN` (token personal de Netlify API)
 5. Deploy.
 
-La función programada corre cada 5 minutos y solo envía si detecta un post nuevo.
+La función programada corre cada 1 hora y solo envía si detecta un post nuevo.
 
 ## Dashboard web en Netlify
 
