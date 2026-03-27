@@ -24,11 +24,15 @@ const views = {
   }
 };
 
+const TECH_ACCESS_KEY = "Ni72da12";
+
 const state = {
   templates: [],
   selectedTemplateId: "",
   selectedTemplateText: ""
 };
+
+let technicalUnlocked = sessionStorage.getItem("technical_unlocked") === "1";
 
 dashboardTokenInput.value = localStorage.getItem("dashboard_token") || "";
 
@@ -175,7 +179,20 @@ async function sendSimpleMessage() {
 navButtons.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-view]");
   if (!button) return;
-  switchView(button.getAttribute("data-view"));
+
+  const targetView = button.getAttribute("data-view");
+  if (targetView === "technical" && !technicalUnlocked) {
+    const provided = window.prompt("Ingresa la clave para acceder a Técnico:", "") || "";
+    if (provided !== TECH_ACCESS_KEY) {
+      setStatus(simpleStatus, "Clave técnica incorrecta.", "status-danger");
+      return;
+    }
+
+    technicalUnlocked = true;
+    sessionStorage.setItem("technical_unlocked", "1");
+  }
+
+  switchView(targetView);
 });
 
 document.getElementById("saveToken").addEventListener("click", () => {
