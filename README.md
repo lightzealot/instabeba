@@ -125,3 +125,4 @@ Si configuras `DASHBOARD_TOKEN`, escríbelo en el campo del dashboard para autor
 
 - El dashboard funciona con envío manual de links de Instagram.
 - El mensaje se construye con plantilla + link, y opcionalmente con texto editado.
+- El bot de Telegram debe tener permisos de administrador para fijar mensajes en el chat/canal.

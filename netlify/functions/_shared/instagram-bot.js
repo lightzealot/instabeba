@@ -377,10 +377,37 @@ async function sendTelegramMessage({ token, chatId, text }) {
     })
   });
 
+  const payload = await response.json().catch(() => null);
+
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Telegram HTTP ${response.status}: ${body}`);
+    throw new Error(`Telegram HTTP ${response.status}: ${JSON.stringify(payload)}`);
   }
+
+  const messageId = payload?.result?.message_id;
+  if (!messageId) {
+    throw new Error("Telegram no devolvió message_id para fijar el mensaje");
+  }
+
+  const pinResponse = await fetch(`https://api.telegram.org/bot${token}/pinChatMessage`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      disable_notification: true
+    })
+  });
+
+  const pinPayload = await pinResponse.json().catch(() => null);
+  if (!pinResponse.ok || pinPayload?.ok === false) {
+    throw new Error(
+      `No se pudo fijar el mensaje en Telegram: ${pinResponse.status} ${JSON.stringify(pinPayload)}`
+    );
+  }
+
+  return { messageId };
 }
 
 function getStoreKeys(username) {
