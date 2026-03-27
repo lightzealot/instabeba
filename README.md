@@ -82,12 +82,11 @@ git remote add origin TU_URL_DEL_REPO
 git push -u origin main
 ```
 
-## Deploy en Netlify (cron)
+## Deploy en Netlify (modo manual)
 
 Este repositorio incluye:
 
 - [netlify.toml](netlify.toml)
-- [netlify/functions/instagram-check.js](netlify/functions/instagram-check.js)
 - [package.json](package.json)
 
 En Netlify:
@@ -98,40 +97,31 @@ En Netlify:
 4. En **Environment variables** agrega:
 	- `TELEGRAM_BOT_TOKEN`
 	- `TELEGRAM_CHAT_ID`
-	- `INSTAGRAM_USERNAME` (sin `@`)
-	- `SEND_ON_FIRST_RUN=false` (recomendado)
-	- `RATE_LIMIT_COOLDOWN_MINUTES=30` (opcional, base para reintentos cuando Instagram responde 429)
 	- `DASHBOARD_TOKEN=tu_clave_privada` (opcional, recomendado para proteger dashboard)
-	- Si ves error de Blobs, agrega también:
-	  - `NETLIFY_BLOBS_SITE_ID`
-	  - `NETLIFY_BLOBS_TOKEN` (token personal de Netlify API)
 5. Deploy.
 
-La función programada corre cada 1 hora y solo envía si detecta un post nuevo.
+No hay cron automático: el envío se ejecuta manualmente desde el dashboard.
 
 ## Dashboard web en Netlify
 
 Después del deploy, abre la raíz del sitio de Netlify (`/`).
 
-- Botón **Actualizar estado**: consulta configuración y último resultado.
-- Botón **Ejecutar revisión ahora**: fuerza una revisión inmediata del perfil.
-- Botón **Enviar mensaje de prueba**: envía un mensaje inmediato al chat/grupo configurado.
+- **Dashboard de Inicio**: envío rápido con link de Instagram y resumen de estado.
+- **Selección de Plantilla**: elige plantillas orientadas a comentar, dar like y apoyar a Beba.
+- **Editor de Mensaje**: permite ajustar el texto antes de enviar y ver preview.
+- **Configuración de Telegram**: guarda `DASHBOARD_TOKEN`, recarga plantillas y envía mensaje de prueba.
+
+El envío principal usa la función `dashboard-send` (POST) con:
+- `templateId`
+- `postUrl`
+- `customMessage` (opcional)
+
+Estado/configuración para KPIs en dashboard:
+- `dashboard-config` (GET)
 
 Si configuras `DASHBOARD_TOKEN`, escríbelo en el campo del dashboard para autorizar llamadas.
 
-### Nota de estado en Netlify
-
-En Netlify el estado se guarda en Blobs (clave por usuario), por eso no depende de `state.json`.
-Para Netlify no necesitas `POLL_SECONDS` ni `STATE_FILE`.
-Si tu entorno no inyecta Blobs automáticamente, usa `NETLIFY_BLOBS_SITE_ID` y `NETLIFY_BLOBS_TOKEN`.
-
-## Persistencia de estado en cloud
-
-El bot guarda el último post enviado en `state.json`.
-Si el servicio reinicia y ese archivo no persiste, con `SEND_ON_FIRST_RUN=false` no enviará histórico: tomará el último post actual como referencia y seguirá desde ahí.
-
 ## Notas
 
-- Funciona con cuentas públicas.
-- Si Instagram limita peticiones temporalmente, el bot reintentará en el siguiente ciclo.
-- El estado de la última publicación enviada se guarda en `state.json`.
+- El dashboard funciona con envío manual de links de Instagram.
+- El mensaje se construye con plantilla + link, y opcionalmente con texto editado.

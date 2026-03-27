@@ -1,4 +1,4 @@
-const { runCheck, validateDashboardAuth } = require("./_shared/instagram-bot");
+const { getTelegramConfigStatus, validateDashboardAuth } = require("./_shared/instagram-bot");
 
 exports.handler = async (event) => {
   const auth = validateDashboardAuth(event);
@@ -6,7 +6,7 @@ exports.handler = async (event) => {
     return auth.response;
   }
 
-  if (event.httpMethod !== "POST") {
+  if (event.httpMethod !== "GET") {
     return {
       statusCode: 405,
       headers: { "content-type": "application/json" },
@@ -14,10 +14,9 @@ exports.handler = async (event) => {
     };
   }
 
-  const { statusCode, payload } = await runCheck();
   return {
-    statusCode,
+    statusCode: 200,
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(getTelegramConfigStatus())
   };
 };

@@ -100,6 +100,18 @@ function getTelegramConfig() {
   };
 }
 
+function getTelegramConfigStatus() {
+  const telegramConfig = getTelegramConfig();
+  return {
+    ok: telegramConfig.missing.length === 0,
+    configured: {
+      TELEGRAM_BOT_TOKEN: !telegramConfig.missing.includes("TELEGRAM_BOT_TOKEN"),
+      TELEGRAM_CHAT_ID: !telegramConfig.missing.includes("TELEGRAM_CHAT_ID")
+    },
+    missing: telegramConfig.missing
+  };
+}
+
 const INVITE_TEMPLATES = [
   {
     id: "template_1",
@@ -120,6 +132,56 @@ const INVITE_TEMPLATES = [
     id: "template_4",
     label: "Impulso rápido",
     text: "🚀 Nueva publicación lista\nEntra ahora, comenta, dale me gusta y ayudemos a Beba a llegar a más gente 🔥"
+  },
+  {
+    id: "template_5",
+    label: "Apoyo cariñoso",
+    text: "💖 Ya salió nueva publicación de Beba\nPásate a comentar algo lindo, deja tu like y súmate al apoyo de la comunidad"
+  },
+  {
+    id: "template_6",
+    label: "Comenta tu opinión",
+    text: "🗣️ Beba publicó contenido nuevo\nCuéntanos en comentarios qué te pareció, dale like y apoyemos este post"
+  },
+  {
+    id: "template_7",
+    label: "Meta de interacción",
+    text: "🎯 Vamos por más interacción para Beba\nDeja tu comentario, regala un like y ayuda a que esta publicación crezca"
+  },
+  {
+    id: "template_8",
+    label: "Llamado de fans",
+    text: "🌟 Fans de Beba, nos activamos\nEntren al post, comenten con buena vibra, den like y compartan apoyo"
+  },
+  {
+    id: "template_9",
+    label: "Comunidad unida",
+    text: "🤝 La comunidad de Beba está presente\nVamos a comentar, dejar me gusta y apoyar esta nueva publicación"
+  },
+  {
+    id: "template_10",
+    label: "Reacción rápida",
+    text: "⚡ Nuevo post de Beba disponible\nPasa ahora, comenta primero, deja tu like y demuestra tu apoyo"
+  },
+  {
+    id: "template_11",
+    label: "Impulso positivo",
+    text: "✨ Hagamos que este post de Beba destaque\nComenta algo positivo, dale like y apóyala con todo"
+  },
+  {
+    id: "template_12",
+    label: "Participación activa",
+    text: "📣 Beba subió una nueva publicación\nTu comentario y tu like hacen la diferencia, entra y apoya"
+  },
+  {
+    id: "template_13",
+    label: "Vamos equipo Beba",
+    text: "💪 Equipo Beba en acción\nComentemos, demos like y apoyemos esta publicación para que llegue más lejos"
+  },
+  {
+    id: "template_14",
+    label: "Apoyo total",
+    text: "🔥 Nueva publicación de Beba en vivo\nDéjale tu comentario, tu me gusta y todo tu apoyo en este post"
   }
 ];
 
@@ -151,6 +213,7 @@ async function runSendTemplateMessage(input) {
 
   const templateId = (input?.templateId || "").trim();
   const postUrl = (input?.postUrl || "").trim();
+  const customMessage = typeof input?.customMessage === "string" ? input.customMessage.trim() : "";
 
   if (!templateId) {
     return {
@@ -181,7 +244,15 @@ async function runSendTemplateMessage(input) {
     };
   }
 
-  const message = [template.text, postUrl].join("\n\n");
+  if (customMessage && customMessage.length > 1200) {
+    return {
+      statusCode: 400,
+      payload: { ok: false, error: "customMessage excede el límite de 1200 caracteres" }
+    };
+  }
+
+  const content = customMessage || template.text;
+  const message = [content, postUrl].join("\n\n");
 
   try {
     await sendTelegramMessage({
@@ -197,7 +268,8 @@ async function runSendTemplateMessage(input) {
         state: "manual_sent",
         message: "Mensaje enviado correctamente",
         templateId,
-        postUrl
+        postUrl,
+        usedCustomMessage: Boolean(customMessage)
       }
     };
   } catch (error) {
@@ -566,23 +638,27 @@ async function getStatus() {
 }
 
 async function runTestMessage() {
-  const config = getConfig();
-  if (config.missing.length) {
+  const telegramConfig = getTelegramConfig();
+  if (telegramConfig.missing.length) {
     return {
       statusCode: 500,
-      payload: { ok: false, error: `Faltan variables: ${config.missing.join(", ")}` }
+      payload: { ok: false, error: `Faltan variables: ${telegramConfig.missing.join(", ")}` }
     };
   }
 
   const now = new Date().toISOString();
   const message = [
-    "✅ Mensaje de prueba del bot Instagram → Telegram",
-    `Cuenta monitoreada: @${config.instagramUsername}`,
+    "✅ Mensaje de prueba del dashboard manual",
+    "Canal listo para recibir publicaciones de Instagram",
     `Fecha: ${now}`
   ].join("\n");
 
   try {
-    await sendTelegramMessage({ token: config.token, chatId: config.chatId, text: message });
+    await sendTelegramMessage({
+      token: telegramConfig.token,
+      chatId: telegramConfig.chatId,
+      text: message
+    });
     return {
       statusCode: 200,
       payload: {
@@ -602,6 +678,7 @@ async function runTestMessage() {
 module.exports = {
   getConfig,
   getInviteTemplates,
+  getTelegramConfigStatus,
   getStatus,
   runTestMessage,
   runSendTemplateMessage,

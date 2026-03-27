@@ -3,148 +3,421 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Enviar publicación a Telegram</title>
+    <title>MessageGen - Instagram to Telegram</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 700px;
-        margin: 30px auto;
-        padding: 0 16px;
+      :root {
+        --bg: #0f1422;
+        --panel: #171e2e;
+        --panel-soft: #20293d;
+        --panel-muted: #232f47;
+        --line: #2d3a57;
+        --text: #ecf1ff;
+        --text-muted: #9fb0d6;
+        --primary: #2b7fff;
+        --primary-soft: #1f5fd6;
+        --ok: #36c270;
+        --warn: #ffb449;
+        --danger: #ff6d6d;
+        --radius: 14px;
       }
-      .row {
-        margin-bottom: 12px;
-      }
-      input, button, select {
-        padding: 10px;
-        font-size: 14px;
-        width: 100%;
+
+      * {
         box-sizing: border-box;
       }
-      button {
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Inter, Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 1px 1px, #2a344f 1px, transparent 0) 0 0 / 22px 22px,
+          var(--bg);
+      }
+
+      .app {
+        max-width: 1360px;
+        margin: 22px auto;
+        padding: 0 14px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 16px;
+      }
+
+      .sidebar {
+        background: linear-gradient(160deg, #1b2336, #151d2e);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+        min-height: calc(100vh - 44px);
+      }
+
+      .logo {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+
+      .logo-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #4f93ff, #265ccc);
+      }
+
+      .logo h1 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .logo p {
+        margin: 2px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .nav button {
+        width: 100%;
+        border: 1px solid transparent;
+        background: #1a2335;
+        color: var(--text-muted);
+        text-align: left;
+        border-radius: 12px;
+        padding: 11px 12px;
+        font-size: 13px;
         cursor: pointer;
       }
-      .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 12px;
-        margin-top: 12px;
+
+      .nav button.active {
+        color: #fff;
+        background: linear-gradient(120deg, #2b7fff2a, #2b7fff14);
+        border-color: #3d76e0;
       }
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: #f7f7f7;
-        border-radius: 6px;
+
+      .sidebar-footer {
+        margin-top: 22px;
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .content {
+        display: grid;
+        gap: 16px;
+      }
+
+      .topbar {
+        background: linear-gradient(170deg, #1a2334, #171f30);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .topbar h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .topbar p {
+        margin: 4px 0 0;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .chip {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #24314d;
+        color: #b6caef;
+        font-size: 12px;
+        border: 1px solid #31456d;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        background: linear-gradient(170deg, var(--panel), #141d2d);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 15px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .input,
+      select,
+      textarea,
+      .btn {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text);
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 160px;
+        resize: vertical;
+      }
+
+      .btn {
+        cursor: pointer;
+        background: #22304a;
+      }
+
+      .btn-primary {
+        border-color: #3f77df;
+        background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .btn-ghost {
+        background: transparent;
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .kpi {
+        background: #1d2640;
+        border: 1px solid #2f4064;
+        border-radius: 12px;
         padding: 10px;
       }
-      .muted {
-        color: #666;
+
+      .kpi label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      .kpi strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 14px;
+      }
+
+      .template-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .template-card {
+        background: #1b253b;
+        border: 1px solid #2f3f62;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+      }
+
+      .template-card.active {
+        border-color: #4f82ea;
+        box-shadow: inset 0 0 0 1px #4f82ea;
+        background: #1f2c46;
+      }
+
+      .template-card h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+
+      .template-card p {
+        margin: 0;
+        color: #c2d3f8;
         font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .editor-layout {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 12px;
+      }
+
+      .preview {
+        background: #172034;
+        border: 1px solid #2b3a5b;
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .preview-bubble {
+        background: #2a3855;
+        border-radius: 12px;
+        padding: 12px;
+        white-space: pre-wrap;
+        line-height: 1.4;
+      }
+
+      .response {
+        margin: 0;
+        background: #121a2a;
+        border-radius: 10px;
+        border: 1px solid #283755;
+        padding: 10px;
+        white-space: pre-wrap;
+        color: #d6e4ff;
+        font-size: 12px;
+      }
+
+      .status-ok,
+      .status-warn,
+      .status-danger {
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      .status-ok { color: var(--ok); }
+      .status-warn { color: var(--warn); }
+      .status-danger { color: var(--danger); }
+
+      @media (max-width: 980px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          min-height: auto;
+        }
+
+        .grid-2,
+        .kpi-grid,
+        .template-grid,
+        .editor-layout {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Enviar publicación de Instagram → Telegram</h1>
-    <p class="muted">Selecciona una plantilla, pega el link y envía el mensaje al chat.</p>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="logo">
+          <div class="logo-badge"></div>
+          <div>
+            <h1>MessageGen</h1>
+            <p>Instagram → Telegram</p>
+          </div>
+        </div>
 
-    <div class="row">
-      <input id="token" placeholder="DASHBOARD_TOKEN (opcional)" />
+        <nav class="nav" id="navButtons">
+          <button data-view="send" class="active">Enviar</button>
+          <button data-view="technical">Técnico</button>
+        </nav>
+
+        <div class="sidebar-footer">
+          Campaña activa: apoyar a Beba con comentarios y likes en cada publicación.
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <h2 id="headerTitle">Enviar publicación</h2>
+            <p id="headerDescription">Pega el link, elige plantilla y envía a Telegram.</p>
+          </div>
+          <span class="chip" id="selectedTemplateChip">Plantilla: sin seleccionar</span>
+        </header>
+
+        <section id="view-send" class="view active">
+          <div class="card">
+            <h3>Enviar nueva publicación</h3>
+            <div style="display: grid; gap: 10px;">
+              <select id="simpleTemplateSelect" class="input"></select>
+              <input id="simplePostUrl" class="input" placeholder="https://www.instagram.com/p/..." />
+              <button id="simpleSend" class="btn btn-primary">Enviar a Telegram</button>
+            </div>
+            <div id="simpleStatus" class="status-warn">Selecciona plantilla y agrega un link de Instagram.</div>
+          </div>
+
+          <div class="card">
+            <h3>Vista previa del mensaje</h3>
+            <div id="userPreview" class="preview-bubble">Selecciona una plantilla para previsualizar.</div>
+          </div>
+        </section>
+
+        <section id="view-technical" class="view">
+          <div class="card">
+            <h3>Configuración técnica</h3>
+            <p style="margin-top: 0; color: var(--text-muted); font-size: 13px;">
+              Esta pestaña agrupa autenticación, pruebas y diagnóstico para administración.
+            </p>
+            <div class="grid-2">
+              <input id="dashboardToken" class="input" placeholder="DASHBOARD_TOKEN (opcional)" />
+              <button id="saveToken" class="btn">Guardar token</button>
+            </div>
+
+            <div class="grid-2" style="margin-top: 10px;">
+              <button id="sendTest" class="btn">Enviar mensaje de prueba</button>
+              <button id="reloadTemplates" class="btn btn-ghost">Recargar plantillas</button>
+            </div>
+            <div style="margin-top: 10px;">
+              <button id="refreshStatus" class="btn">Actualizar estado técnico</button>
+            </div>
+
+            <div id="settingsStatus" class="status-warn">Sin acciones recientes.</div>
+          </div>
+
+          <div class="card">
+            <h3>Estado de Telegram</h3>
+            <div class="kpi-grid">
+              <div class="kpi">
+                <label>Token</label>
+                <strong id="techKpiToken">-</strong>
+              </div>
+              <div class="kpi">
+                <label>Chat ID</label>
+                <strong id="techKpiChat">-</strong>
+              </div>
+              <div class="kpi">
+                <label>Estado</label>
+                <strong id="techKpiState">-</strong>
+              </div>
+            </div>
+          </div>
+
+          <section class="card">
+            <h3>Respuesta API</h3>
+            <pre id="output" class="response">Sin datos todavía.</pre>
+          </section>
+        </section>
+      </main>
     </div>
 
-    <div class="row">
-      <button id="saveToken">Guardar token</button>
-    </div>
-
-    <div class="row">
-      <select id="template"></select>
-    </div>
-
-    <div class="row">
-      <input id="postUrl" placeholder="https://www.instagram.com/p/..." />
-    </div>
-
-    <div class="row">
-      <button id="sendNow">Enviar a Telegram</button>
-    </div>
-
-    <div class="card">
-      <h3>Respuesta</h3>
-      <pre id="output">Sin datos todavía.</pre>
-    </div>
-
-    <script>
-      const output = document.getElementById("output");
-      const tokenInput = document.getElementById("token");
-      const templateSelect = document.getElementById("template");
-      const postUrlInput = document.getElementById("postUrl");
-
-      tokenInput.value = localStorage.getItem("dashboard_token") || "";
-
-      function getHeaders() {
-        const token = localStorage.getItem("dashboard_token") || "";
-        const headers = { "content-type": "application/json" };
-        if (token) {
-          headers["x-dashboard-token"] = token;
-        }
-        return headers;
-      }
-
-      async function callApi(url, options = {}) {
-        const response = await fetch(url, {
-          ...options,
-          headers: {
-            ...getHeaders(),
-            ...(options.headers || {})
-          }
-        });
-        const text = await response.text();
-        let parsed = text;
-        try {
-          parsed = JSON.parse(text);
-        } catch (_) {}
-
-        output.textContent = JSON.stringify(
-          {
-            status: response.status,
-            data: parsed
-          },
-          null,
-          2
-        );
-
-        return { status: response.status, data: parsed };
-      }
-
-      async function loadTemplates() {
-        const result = await callApi("/.netlify/functions/dashboard-send");
-        if (!result.data || !result.data.ok || !Array.isArray(result.data.templates)) {
-          return;
-        }
-
-        templateSelect.innerHTML = "";
-        result.data.templates.forEach((template) => {
-          const option = document.createElement("option");
-          option.value = template.id;
-          option.textContent = template.label;
-          templateSelect.appendChild(option);
-        });
-      }
-
-      document.getElementById("saveToken").addEventListener("click", () => {
-        localStorage.setItem("dashboard_token", tokenInput.value.trim());
-        output.textContent = "Token guardado en el navegador.";
-      });
-
-      document.getElementById("sendNow").addEventListener("click", async () => {
-        await callApi("/.netlify/functions/dashboard-send", {
-          method: "POST",
-          body: JSON.stringify({
-            templateId: templateSelect.value,
-            postUrl: postUrlInput.value.trim()
-          })
-        });
-      });
-
-      loadTemplates();
-    </script>
+    <script src="./app.js"></script>
   </body>
 </html>
