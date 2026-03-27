@@ -6,18 +6,18 @@
     <title>MessageGen - Instagram to Telegram</title>
     <style>
       :root {
-        --bg: #0f1422;
-        --panel: #171e2e;
-        --panel-soft: #20293d;
-        --panel-muted: #232f47;
-        --line: #2d3a57;
-        --text: #ecf1ff;
-        --text-muted: #9fb0d6;
-        --primary: #2b7fff;
-        --primary-soft: #1f5fd6;
-        --ok: #36c270;
-        --warn: #ffb449;
-        --danger: #ff6d6d;
+        --bg: #f4f7fc;
+        --panel: #ffffff;
+        --panel-soft: #f6f9ff;
+        --panel-muted: #ecf3ff;
+        --line: #dfe6f1;
+        --text: #1d304a;
+        --text-muted: #6f8199;
+        --primary: #0077b8;
+        --primary-soft: #0a6aa1;
+        --ok: #1f9d61;
+        --warn: #d78a1f;
+        --danger: #d44d4d;
         --radius: 14px;
       }
 
@@ -30,9 +30,7 @@
         min-height: 100vh;
         font-family: "Segoe UI", Inter, Arial, sans-serif;
         color: var(--text);
-        background:
-          radial-gradient(circle at 1px 1px, #2a344f 1px, transparent 0) 0 0 / 22px 22px,
-          var(--bg);
+        background: var(--bg);
       }
 
       .app {
@@ -45,7 +43,7 @@
       }
 
       .sidebar {
-        background: linear-gradient(160deg, #1b2336, #151d2e);
+        background: #f1f5fb;
         border: 1px solid var(--line);
         border-radius: 18px;
         padding: 16px;
@@ -63,12 +61,13 @@
         width: 36px;
         height: 36px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #4f93ff, #265ccc);
+        background: linear-gradient(135deg, #0a78bc, #0f6798);
       }
 
       .logo h1 {
         font-size: 16px;
         margin: 0;
+        color: #2b4acb;
       }
 
       .logo p {
@@ -85,8 +84,8 @@
       .nav button {
         width: 100%;
         border: 1px solid transparent;
-        background: #1a2335;
-        color: var(--text-muted);
+        background: transparent;
+        color: #35506f;
         text-align: left;
         border-radius: 12px;
         padding: 11px 12px;
@@ -95,9 +94,9 @@
       }
 
       .nav button.active {
-        color: #fff;
-        background: linear-gradient(120deg, #2b7fff2a, #2b7fff14);
-        border-color: #3d76e0;
+        color: #2f59d3;
+        background: #e8f0ff;
+        border-color: #d5e4ff;
       }
 
       .sidebar-footer {
@@ -114,7 +113,7 @@
       }
 
       .topbar {
-        background: linear-gradient(170deg, #1a2334, #171f30);
+        background: #ffffff;
         border: 1px solid var(--line);
         border-radius: 18px;
         padding: 14px;
@@ -138,10 +137,10 @@
       .chip {
         padding: 7px 10px;
         border-radius: 999px;
-        background: #24314d;
-        color: #b6caef;
+        background: #eef4ff;
+        color: #4266a5;
         font-size: 12px;
-        border: 1px solid #31456d;
+        border: 1px solid #d7e5ff;
       }
 
       .view {
@@ -154,7 +153,7 @@
       }
 
       .card {
-        background: linear-gradient(170deg, var(--panel), #141d2d);
+        background: var(--panel);
         border: 1px solid var(--line);
         border-radius: var(--radius);
         padding: 14px;
@@ -178,7 +177,7 @@
         width: 100%;
         border-radius: 10px;
         border: 1px solid var(--line);
-        background: var(--panel-soft);
+        background: #ffffff;
         color: var(--text);
         padding: 10px 12px;
         font-size: 14px;
@@ -191,18 +190,19 @@
 
       .btn {
         cursor: pointer;
-        background: #22304a;
+        background: #edf3fb;
+        color: #315277;
       }
 
       .btn-primary {
-        border-color: #3f77df;
+        border-color: #0a6aa1;
         background: linear-gradient(135deg, var(--primary), var(--primary-soft));
         color: #fff;
         font-weight: 600;
       }
 
       .btn-ghost {
-        background: transparent;
+        background: #f8fbff;
       }
 
       .kpi-grid {
@@ -212,8 +212,8 @@
       }
 
       .kpi {
-        background: #1d2640;
-        border: 1px solid #2f4064;
+        background: #f7faff;
+        border: 1px solid #e3ebf7;
         border-radius: 12px;
         padding: 10px;
       }
@@ -269,14 +269,16 @@
       }
 
       .preview {
-        background: #172034;
-        border: 1px solid #2b3a5b;
+        background: #f7faff;
+        border: 1px solid #e1e9f7;
         border-radius: 12px;
         padding: 12px;
       }
 
       .preview-bubble {
-        background: #2a3855;
+        background: #edf3ff;
+        border: 1px solid #dce8ff;
+        color: #223b60;
         border-radius: 12px;
         padding: 12px;
         white-space: pre-wrap;
@@ -285,12 +287,12 @@
 
       .response {
         margin: 0;
-        background: #121a2a;
+        background: #f4f8ff;
         border-radius: 10px;
-        border: 1px solid #283755;
+        border: 1px solid #dbe6f8;
         padding: 10px;
         white-space: pre-wrap;
-        color: #d6e4ff;
+        color: #2f4766;
         font-size: 12px;
       }
 
@@ -358,7 +360,13 @@
             <h3>Enviar nueva publicación</h3>
             <div style="display: grid; gap: 10px;">
               <select id="simpleTemplateSelect" class="input"></select>
-              <input id="simplePostUrl" class="input" placeholder="https://www.instagram.com/p/..." />
+              <input
+                id="simplePostUrl"
+                class="input"
+                type="url"
+                required
+                placeholder="https://www.instagram.com/p/..."
+              />
               <button id="simpleSend" class="btn btn-primary">Enviar a Telegram</button>
             </div>
             <div id="simpleStatus" class="status-warn">Selecciona plantilla y agrega un link de Instagram.</div>
