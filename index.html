@@ -3,27 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Instagram Bot</title>
+    <title>Enviar publicación a Telegram</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        max-width: 760px;
+        max-width: 700px;
         margin: 30px auto;
         padding: 0 16px;
       }
       .row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
         margin-bottom: 12px;
       }
-      input, button {
+      input, button, select {
         padding: 10px;
         font-size: 14px;
-      }
-      input {
-        flex: 1;
-        min-width: 260px;
+        width: 100%;
+        box-sizing: border-box;
       }
       button {
         cursor: pointer;
@@ -48,18 +43,27 @@
     </style>
   </head>
   <body>
-    <h1>Dashboard Instagram → Telegram</h1>
-    <p class="muted">Estado del bot y ejecución manual de revisión.</p>
+    <h1>Enviar publicación de Instagram → Telegram</h1>
+    <p class="muted">Selecciona una plantilla, pega el link y envía el mensaje al chat.</p>
 
     <div class="row">
       <input id="token" placeholder="DASHBOARD_TOKEN (opcional)" />
+    </div>
+
+    <div class="row">
       <button id="saveToken">Guardar token</button>
     </div>
 
     <div class="row">
-      <button id="refresh">Actualizar estado</button>
-      <button id="runNow">Ejecutar revisión ahora</button>
-      <button id="sendTest">Enviar mensaje de prueba</button>
+      <select id="template"></select>
+    </div>
+
+    <div class="row">
+      <input id="postUrl" placeholder="https://www.instagram.com/p/..." />
+    </div>
+
+    <div class="row">
+      <button id="sendNow">Enviar a Telegram</button>
     </div>
 
     <div class="card">
@@ -70,6 +74,8 @@
     <script>
       const output = document.getElementById("output");
       const tokenInput = document.getElementById("token");
+      const templateSelect = document.getElementById("template");
+      const postUrlInput = document.getElementById("postUrl");
 
       tokenInput.value = localStorage.getItem("dashboard_token") || "";
 
@@ -104,6 +110,23 @@
           null,
           2
         );
+
+        return { status: response.status, data: parsed };
+      }
+
+      async function loadTemplates() {
+        const result = await callApi("/.netlify/functions/dashboard-send");
+        if (!result.data || !result.data.ok || !Array.isArray(result.data.templates)) {
+          return;
+        }
+
+        templateSelect.innerHTML = "";
+        result.data.templates.forEach((template) => {
+          const option = document.createElement("option");
+          option.value = template.id;
+          option.textContent = template.label;
+          templateSelect.appendChild(option);
+        });
       }
 
       document.getElementById("saveToken").addEventListener("click", () => {
@@ -111,17 +134,17 @@
         output.textContent = "Token guardado en el navegador.";
       });
 
-      document.getElementById("refresh").addEventListener("click", async () => {
-        await callApi("/.netlify/functions/dashboard-status");
+      document.getElementById("sendNow").addEventListener("click", async () => {
+        await callApi("/.netlify/functions/dashboard-send", {
+          method: "POST",
+          body: JSON.stringify({
+            templateId: templateSelect.value,
+            postUrl: postUrlInput.value.trim()
+          })
+        });
       });
 
-      document.getElementById("runNow").addEventListener("click", async () => {
-        await callApi("/.netlify/functions/dashboard-run", { method: "POST" });
-      });
-
-      document.getElementById("sendTest").addEventListener("click", async () => {
-        await callApi("/.netlify/functions/dashboard-test", { method: "POST" });
-      });
+      loadTemplates();
     </script>
   </body>
 </html>

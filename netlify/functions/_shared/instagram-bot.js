@@ -85,6 +85,129 @@ function getConfig() {
   };
 }
 
+function getTelegramConfig() {
+  const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  const chatId = (process.env.TELEGRAM_CHAT_ID || "").trim();
+
+  const missing = [];
+  if (!token) missing.push("TELEGRAM_BOT_TOKEN");
+  if (!chatId) missing.push("TELEGRAM_CHAT_ID");
+
+  return {
+    token,
+    chatId,
+    missing
+  };
+}
+
+const INVITE_TEMPLATES = [
+  {
+    id: "template_1",
+    label: "Invitación general",
+    text: "✨ Nueva publicación de Beba ✨\nPásate a dejar tu comentario, dale like y apóyala con toda la buena vibra 💖"
+  },
+  {
+    id: "template_2",
+    label: "Llamado a comentar",
+    text: "📝 Beba subió contenido nuevo\nCuéntanos qué te pareció en comentarios, deja tu like y comparte apoyo 🙌"
+  },
+  {
+    id: "template_3",
+    label: "Apoyo de la comunidad",
+    text: "💫 Equipo Beba, nos activamos\nVamos a comentar, dejar like y apoyar esta nueva publicación con cariño 🤍"
+  },
+  {
+    id: "template_4",
+    label: "Impulso rápido",
+    text: "🚀 Nueva publicación lista\nEntra ahora, comenta, dale me gusta y ayudemos a Beba a llegar a más gente 🔥"
+  }
+];
+
+function getInviteTemplates() {
+  return INVITE_TEMPLATES;
+}
+
+function isValidInstagramLink(value) {
+  if (!value || typeof value !== "string") {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(value.trim());
+    return /(^|\.)instagram\.com$/i.test(parsed.hostname) && parsed.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+}
+
+async function runSendTemplateMessage(input) {
+  const telegramConfig = getTelegramConfig();
+  if (telegramConfig.missing.length) {
+    return {
+      statusCode: 500,
+      payload: { ok: false, error: `Faltan variables: ${telegramConfig.missing.join(", ")}` }
+    };
+  }
+
+  const templateId = (input?.templateId || "").trim();
+  const postUrl = (input?.postUrl || "").trim();
+
+  if (!templateId) {
+    return {
+      statusCode: 400,
+      payload: { ok: false, error: "templateId es requerido" }
+    };
+  }
+
+  if (!postUrl) {
+    return {
+      statusCode: 400,
+      payload: { ok: false, error: "postUrl es requerido" }
+    };
+  }
+
+  if (!isValidInstagramLink(postUrl)) {
+    return {
+      statusCode: 400,
+      payload: { ok: false, error: "El link debe ser una URL válida de Instagram con https" }
+    };
+  }
+
+  const template = INVITE_TEMPLATES.find((item) => item.id === templateId);
+  if (!template) {
+    return {
+      statusCode: 400,
+      payload: { ok: false, error: "templateId no válido" }
+    };
+  }
+
+  const message = [template.text, postUrl].join("\n\n");
+
+  try {
+    await sendTelegramMessage({
+      token: telegramConfig.token,
+      chatId: telegramConfig.chatId,
+      text: message
+    });
+
+    return {
+      statusCode: 200,
+      payload: {
+        ok: true,
+        state: "manual_sent",
+        message: "Mensaje enviado correctamente",
+        templateId,
+        postUrl
+      }
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      payload: { ok: false, error: `Error: ${error.message}` }
+    };
+  }
+}
+
 function getDashboardToken() {
   return (process.env.DASHBOARD_TOKEN || "").trim();
 }
@@ -478,8 +601,10 @@ async function runTestMessage() {
 
 module.exports = {
   getConfig,
+  getInviteTemplates,
   getStatus,
   runTestMessage,
+  runSendTemplateMessage,
   runCheck,
   validateDashboardAuth
 };
