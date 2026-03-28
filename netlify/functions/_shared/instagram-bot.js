@@ -116,72 +116,72 @@ const INVITE_TEMPLATES = [
   {
     id: "template_1",
     label: "Invitación general",
-    text: "✨ Nueva publicación de Beba ✨\nPásate a dejar tu comentario, dale like y apóyala con toda la buena vibra 💖"
+    text: "✨ Nueva publicación de Beba ✨\nPásate a dejar tu comentario con buena energía, dale like y comparte este post con alguien que también quiera apoyar. Cada interacción suma muchísimo y ayuda a que más personas vean su contenido 💖"
   },
   {
     id: "template_2",
     label: "Llamado a comentar",
-    text: "📝 Beba subió contenido nuevo\nCuéntanos qué te pareció en comentarios, deja tu like y comparte apoyo 🙌"
+    text: "📝 Beba subió contenido nuevo\nCuéntanos en comentarios qué parte te gustó más, deja tu like y si puedes responde a otros comentarios para mantener activa la conversación. Tu participación hace que el post tenga más alcance 🙌"
   },
   {
     id: "template_3",
     label: "Apoyo de la comunidad",
-    text: "💫 Equipo Beba, nos activamos\nVamos a comentar, dejar like y apoyar esta nueva publicación con cariño 🤍"
+    text: "💫 Equipo Beba, nos activamos\nVamos a comentar con cariño, dejar like y mostrar apoyo real en esta publicación. Si tienes un minuto extra, comparte el post en tus historias o con amigos para que la comunidad siga creciendo 🤍"
   },
   {
     id: "template_4",
     label: "Impulso rápido",
-    text: "🚀 Nueva publicación lista\nEntra ahora, comenta, dale me gusta y ayudemos a Beba a llegar a más gente 🔥"
+    text: "🚀 Nueva publicación lista\nEntra ahora mismo, comenta algo positivo, dale me gusta y guarda la publicación para reforzar la interacción. Con esas acciones rápidas ayudamos a Beba a llegar a más gente en menos tiempo 🔥"
   },
   {
     id: "template_5",
     label: "Apoyo cariñoso",
-    text: "💖 Ya salió nueva publicación de Beba\nPásate a comentar algo lindo, deja tu like y súmate al apoyo de la comunidad"
+    text: "💖 Ya salió nueva publicación de Beba\nPásate a comentar algo lindo y auténtico, deja tu like y súmate al apoyo de la comunidad. Un mensaje bonito y cercano puede hacer una gran diferencia en la motivación del día"
   },
   {
     id: "template_6",
     label: "Comenta tu opinión",
-    text: "🗣️ Beba publicó contenido nuevo\nCuéntanos en comentarios qué te pareció, dale like y apoyemos este post"
+    text: "🗣️ Beba publicó contenido nuevo\nCuéntanos en comentarios qué te pareció, qué detalle te llamó más la atención o qué te gustaría ver después. Dale like y ayudemos entre todos a que este post siga creciendo"
   },
   {
     id: "template_7",
     label: "Meta de interacción",
-    text: "🎯 Vamos por más interacción para Beba\nDeja tu comentario, regala un like y ayuda a que esta publicación crezca"
+    text: "🎯 Vamos por más interacción para Beba\nDeja tu comentario, regala un like y, si te nace, comparte el link con dos personas más. Nuestra meta es mover el post con interacciones reales y mantenerlo activo durante más tiempo"
   },
   {
     id: "template_8",
     label: "Llamado de fans",
-    text: "🌟 Fans de Beba, nos activamos\nEntren al post, comenten con buena vibra, den like y compartan apoyo"
+    text: "🌟 Fans de Beba, nos activamos\nEntren al post, comenten con buena vibra, den like y compartan apoyo con mensajes que aporten. Si cada uno suma una interacción extra, el alcance del contenido sube muchísimo"
   },
   {
     id: "template_9",
     label: "Comunidad unida",
-    text: "🤝 La comunidad de Beba está presente\nVamos a comentar, dejar me gusta y apoyar esta nueva publicación"
+    text: "🤝 La comunidad de Beba está presente\nVamos a comentar, dejar me gusta y apoyar esta nueva publicación como equipo. Entre más movimiento tenga en los primeros minutos, más oportunidades tendrá de llegar a nueva audiencia"
   },
   {
     id: "template_10",
     label: "Reacción rápida",
-    text: "⚡ Nuevo post de Beba disponible\nPasa ahora, comenta primero, deja tu like y demuestra tu apoyo"
+    text: "⚡ Nuevo post de Beba disponible\nPasa ahora, comenta primero con un mensaje positivo, deja tu like y guarda la publicación. Esa reacción rápida ayuda mucho a posicionar mejor el contenido desde el inicio"
   },
   {
     id: "template_11",
     label: "Impulso positivo",
-    text: "✨ Hagamos que este post de Beba destaque\nComenta algo positivo, dale like y apóyala con todo"
+    text: "✨ Hagamos que este post de Beba destaque\nComenta algo positivo y personal, dale like y anímate a interactuar con otros comentarios. Mientras más conversación orgánica generemos, más fuerte será el impulso del post"
   },
   {
     id: "template_12",
     label: "Participación activa",
-    text: "📣 Beba subió una nueva publicación\nTu comentario y tu like hacen la diferencia, entra y apoya"
+    text: "📣 Beba subió una nueva publicación\nTu comentario y tu like hacen la diferencia, entra y apoya con una interacción completa. Si puedes, comparte el enlace en tu grupo o estado para sumar más alcance de manera natural"
   },
   {
     id: "template_13",
     label: "Vamos equipo Beba",
-    text: "💪 Equipo Beba en acción\nComentemos, demos like y apoyemos esta publicación para que llegue más lejos"
+    text: "💪 Equipo Beba en acción\nComentemos con intención, demos like y apoyemos esta publicación para que llegue más lejos. Cada aporte cuenta: comentar, reaccionar y compartir nos ayuda a mantener un crecimiento constante"
   },
   {
     id: "template_14",
     label: "Apoyo total",
-    text: "🔥 Nueva publicación de Beba en vivo\nDéjale tu comentario, tu me gusta y todo tu apoyo en este post"
+    text: "🔥 Nueva publicación de Beba en vivo\nDéjale tu comentario, tu me gusta y todo tu apoyo en este post. Aprovechemos este momento para levantar la interacción y mostrar una comunidad activa, cercana y comprometida"
   }
 ];
 
