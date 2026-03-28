@@ -6,19 +6,22 @@
     <title>MessageGen - Instagram to Telegram</title>
     <style>
       :root {
-        --bg: #f4f7fc;
-        --panel: #ffffff;
-        --panel-soft: #f6f9ff;
-        --panel-muted: #ecf3ff;
-        --line: #dfe6f1;
-        --text: #1d304a;
-        --text-muted: #6f8199;
-        --primary: #0077b8;
-        --primary-soft: #0a6aa1;
+        --bg-deep: #052136;
+        --bg-mid: #0f3553;
+        --bg-soft: #f4f8fd;
+        --panel: rgba(255, 255, 255, 0.9);
+        --panel-strong: #ffffff;
+        --line: #d5e2f2;
+        --text: #12314b;
+        --text-muted: #55738f;
+        --primary: #0f87d4;
+        --primary-strong: #0d6dad;
+        --accent: #f7a541;
         --ok: #1f9d61;
-        --warn: #d78a1f;
-        --danger: #d44d4d;
-        --radius: 14px;
+        --warn: #c9811f;
+        --danger: #cc4f4f;
+        --shadow: 0 14px 30px rgba(7, 33, 58, 0.14);
+        --radius: 18px;
       }
 
       * {
@@ -28,83 +31,131 @@
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: "Segoe UI", Inter, Arial, sans-serif;
+        font-family: "Bahnschrift", "Candara", "Trebuchet MS", sans-serif;
         color: var(--text);
-        background: var(--bg);
+        background:
+          radial-gradient(circle at 15% 15%, rgba(247, 165, 65, 0.24), transparent 35%),
+          radial-gradient(circle at 85% 80%, rgba(14, 130, 206, 0.2), transparent 40%),
+          linear-gradient(155deg, var(--bg-deep), var(--bg-mid) 42%, #e8f0f9 42.1%, var(--bg-soft));
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        pointer-events: none;
+        z-index: 0;
+        border-radius: 50%;
+        filter: blur(14px);
+      }
+
+      body::before {
+        width: 280px;
+        height: 280px;
+        background: rgba(247, 165, 65, 0.24);
+        top: -100px;
+        right: -50px;
+      }
+
+      body::after {
+        width: 320px;
+        height: 320px;
+        background: rgba(15, 135, 212, 0.2);
+        bottom: -120px;
+        left: -90px;
       }
 
       .app {
         max-width: 1360px;
-        margin: 22px auto;
-        padding: 0 14px;
+        margin: 24px auto;
+        padding: 0 16px;
         display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 16px;
+        grid-template-columns: 280px 1fr;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
       }
 
       .sidebar {
-        background: #f1f5fb;
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 16px;
-        min-height: calc(100vh - 44px);
+        background: linear-gradient(180deg, rgba(7, 36, 60, 0.9), rgba(7, 48, 76, 0.88));
+        border: 1px solid rgba(166, 201, 234, 0.28);
+        box-shadow: var(--shadow);
+        border-radius: 22px;
+        padding: 20px 16px;
+        min-height: calc(100vh - 48px);
+        backdrop-filter: blur(8px);
       }
 
       .logo {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
-        margin-bottom: 18px;
+        margin-bottom: 24px;
       }
 
       .logo-badge {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #0a78bc, #0f6798);
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: conic-gradient(from 210deg, #f7a541, #0f87d4, #f7a541);
+        box-shadow: 0 10px 18px rgba(11, 22, 39, 0.45);
+        animation: pulseBadge 4s ease-in-out infinite;
       }
 
       .logo h1 {
-        font-size: 16px;
+        font-family: "Rockwell", "Cambria", "Times New Roman", serif;
+        font-size: 18px;
         margin: 0;
-        color: #2b4acb;
+        color: #f4f8ff;
+        letter-spacing: 0.3px;
       }
 
       .logo p {
         margin: 2px 0 0;
         font-size: 12px;
-        color: var(--text-muted);
+        color: #9fc3e8;
       }
 
       .nav {
         display: grid;
-        gap: 8px;
+        gap: 10px;
       }
 
       .nav button {
         width: 100%;
-        border: 1px solid transparent;
-        background: transparent;
-        color: #35506f;
+        border: 1px solid rgba(181, 206, 231, 0.22);
+        background: rgba(255, 255, 255, 0.06);
+        color: #d9e9f9;
         text-align: left;
-        border-radius: 12px;
-        padding: 11px 12px;
+        border-radius: 14px;
+        padding: 12px 14px;
         font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
+        transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+      }
+
+      .nav button:hover {
+        transform: translateX(2px);
+        background: rgba(255, 255, 255, 0.14);
       }
 
       .nav button.active {
-        color: #2f59d3;
-        background: #e8f0ff;
-        border-color: #d5e4ff;
+        color: #fff;
+        background: linear-gradient(130deg, rgba(15, 135, 212, 0.82), rgba(247, 165, 65, 0.78));
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 14px rgba(6, 24, 47, 0.33);
       }
 
       .sidebar-footer {
         margin-top: 22px;
-        border-top: 1px solid var(--line);
-        padding-top: 12px;
+        border-top: 1px solid rgba(181, 206, 231, 0.25);
+        padding-top: 14px;
         font-size: 12px;
-        color: var(--text-muted);
+        color: #afcbe6;
+        line-height: 1.5;
       }
 
       .content {
@@ -113,10 +164,11 @@
       }
 
       .topbar {
-        background: #ffffff;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.9), rgba(244, 249, 255, 0.95));
         border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 14px;
+        box-shadow: var(--shadow);
+        border-radius: 20px;
+        padding: 16px;
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 10px;
@@ -125,7 +177,9 @@
 
       .topbar h2 {
         margin: 0;
-        font-size: 18px;
+        font-family: "Rockwell", "Cambria", "Times New Roman", serif;
+        font-size: 21px;
+        color: #11314f;
       }
 
       .topbar p {
@@ -135,12 +189,13 @@
       }
 
       .chip {
-        padding: 7px 10px;
+        padding: 8px 12px;
         border-radius: 999px;
-        background: #eef4ff;
-        color: #4266a5;
+        background: linear-gradient(120deg, rgba(16, 140, 220, 0.13), rgba(247, 165, 65, 0.21));
+        color: #265680;
         font-size: 12px;
-        border: 1px solid #d7e5ff;
+        border: 1px solid #c9dcf3;
+        font-weight: 600;
       }
 
       .view {
@@ -150,18 +205,30 @@
       .view.active {
         display: grid;
         gap: 16px;
+        animation: fadeInUp 0.45s ease;
       }
 
       .card {
         background: var(--panel);
+        backdrop-filter: blur(6px);
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        padding: 14px;
+        box-shadow: var(--shadow);
+        padding: 16px;
+        animation: cardLift 0.45s ease;
       }
 
       .card h3 {
         margin: 0 0 10px;
-        font-size: 15px;
+        font-size: 16px;
+        color: #153753;
+      }
+
+      .card-subtitle {
+        margin-top: 0;
+        margin-bottom: 12px;
+        color: var(--text-muted);
+        font-size: 13px;
       }
 
       .grid-2 {
@@ -175,12 +242,21 @@
       textarea,
       .btn {
         width: 100%;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 1px solid var(--line);
-        background: #ffffff;
+        background: var(--panel-strong);
         color: var(--text);
         padding: 10px 12px;
         font-size: 14px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #9dc8ed;
+        box-shadow: 0 0 0 3px rgba(15, 135, 212, 0.14);
       }
 
       textarea {
@@ -190,19 +266,44 @@
 
       .btn {
         cursor: pointer;
-        background: #edf3fb;
-        color: #315277;
-      }
-
-      .btn-primary {
-        border-color: #0a6aa1;
-        background: linear-gradient(135deg, var(--primary), var(--primary-soft));
-        color: #fff;
+        background: linear-gradient(125deg, #eef5fc, #e8f2fb);
+        color: #2d5377;
         font-weight: 600;
       }
 
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: #bfd5ea;
+      }
+
+      .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        border-color: #0c6ca8;
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 10px 18px rgba(12, 90, 140, 0.22);
+      }
+
       .btn-ghost {
-        background: #f8fbff;
+        background: #f7fbff;
+      }
+
+      .send-form {
+        display: grid;
+        gap: 10px;
+      }
+
+      .actions-grid {
+        margin-top: 10px;
+      }
+
+      .refresh-wrap {
+        margin-top: 10px;
       }
 
       .kpi-grid {
@@ -212,8 +313,8 @@
       }
 
       .kpi {
-        background: #f7faff;
-        border: 1px solid #e3ebf7;
+        background: linear-gradient(160deg, #ffffff, #eef5fd);
+        border: 1px solid #d7e4f3;
         border-radius: 12px;
         padding: 10px;
       }
@@ -276,23 +377,37 @@
       }
 
       .preview-bubble {
-        background: #edf3ff;
-        border: 1px solid #dce8ff;
+        background: linear-gradient(130deg, #e7f2ff, #f8f4e9);
+        border: 1px solid #d3e4f8;
         color: #223b60;
         border-radius: 12px;
         padding: 12px;
         white-space: pre-wrap;
         line-height: 1.4;
+        position: relative;
+      }
+
+      .preview-bubble::before {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        left: 16px;
+        bottom: -7px;
+        background: #eef5fb;
+        border-bottom: 1px solid #d3e4f8;
+        border-right: 1px solid #d3e4f8;
+        transform: rotate(45deg);
       }
 
       .response {
         margin: 0;
-        background: #f4f8ff;
+        background: #eef5fd;
         border-radius: 10px;
-        border: 1px solid #dbe6f8;
+        border: 1px solid #d2e3f4;
         padding: 10px;
         white-space: pre-wrap;
-        color: #2f4766;
+        color: #214465;
         font-size: 12px;
       }
 
@@ -301,11 +416,53 @@
       .status-danger {
         font-size: 12px;
         margin-top: 8px;
+        font-weight: 600;
       }
 
       .status-ok { color: var(--ok); }
       .status-warn { color: var(--warn); }
       .status-danger { color: var(--danger); }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes cardLift {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.99);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes pulseBadge {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
 
       @media (max-width: 980px) {
         .app {
@@ -314,6 +471,7 @@
 
         .sidebar {
           min-height: auto;
+          border-radius: 18px;
         }
 
         .grid-2,
@@ -321,6 +479,14 @@
         .template-grid,
         .editor-layout {
           grid-template-columns: 1fr;
+        }
+
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .chip {
+          justify-self: start;
         }
       }
     </style>
@@ -358,7 +524,7 @@
         <section id="view-send" class="view active">
           <div class="card">
             <h3>Enviar nueva publicación</h3>
-            <div style="display: grid; gap: 10px;">
+            <div class="send-form">
               <select id="simpleTemplateSelect" class="input"></select>
               <input
                 id="simplePostUrl"
@@ -381,7 +547,7 @@
         <section id="view-technical" class="view">
           <div class="card">
             <h3>Configuración técnica</h3>
-            <p style="margin-top: 0; color: var(--text-muted); font-size: 13px;">
+            <p class="card-subtitle">
               Esta pestaña agrupa autenticación, pruebas y diagnóstico para administración.
             </p>
             <div class="grid-2">
@@ -389,11 +555,11 @@
               <button id="saveToken" class="btn">Guardar token</button>
             </div>
 
-            <div class="grid-2" style="margin-top: 10px;">
+            <div class="grid-2 actions-grid">
               <button id="sendTest" class="btn">Enviar mensaje de prueba</button>
               <button id="reloadTemplates" class="btn btn-ghost">Recargar plantillas</button>
             </div>
-            <div style="margin-top: 10px;">
+            <div class="refresh-wrap">
               <button id="refreshStatus" class="btn">Actualizar estado técnico</button>
             </div>
 

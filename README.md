@@ -1,6 +1,6 @@
-# Bot Instagram -> Telegram
+# Bot de Links a Telegram
 
-Este bot revisa periódicamente las últimas publicaciones de una cuenta pública de Instagram y envía las nuevas a un chat de Telegram.
+Este proyecto esta enfocado en publicar links manualmente a Telegram (por dashboard o por comando), sin monitoreo automatico de usuario de Instagram.
 
 ## Requisitos
 
@@ -22,20 +22,20 @@ pip install -r requirements.txt
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
-- `INSTAGRAM_USERNAME` (sin `@`)
 
 Opcionales:
-- `POLL_SECONDS` (por defecto `300`)
-- `STATE_FILE` (por defecto `state.json`)
-- `SEND_ON_FIRST_RUN` (`false` para no reenviar histórico)
+- `POST_URL` (si quieres enviar un link directo al ejecutar `src/main.py`)
+- `TELEGRAM_MESSAGE_TEMPLATE` (debe incluir `{post_url}`)
 
 ## Ejecución
 
 ```bash
-python src/main.py
+python src/main.py https://www.instagram.com/p/XXXXXXXXXXX/
 ```
 
-## Deploy en Render (worker 24/7)
+Si no pasas argumento, tambien puedes definir `POST_URL` en el `.env`.
+
+## Deploy en Render (worker)
 
 Este repositorio ya incluye [render.yaml](render.yaml), así que puedes usar Blueprint:
 
@@ -47,12 +47,10 @@ Este repositorio ya incluye [render.yaml](render.yaml), así que puedes usar Blu
 4. En variables de entorno del servicio, completa:
 	- `TELEGRAM_BOT_TOKEN`
 	- `TELEGRAM_CHAT_ID`
-	- `INSTAGRAM_USERNAME`
+	- `POST_URL` (opcional)
 
 Opcionales:
-- `POLL_SECONDS` (ejemplo `300`)
-- `SEND_ON_FIRST_RUN` (`false` recomendado)
-- `STATE_FILE` (`state.json` por defecto)
+- `TELEGRAM_MESSAGE_TEMPLATE`
 
 ## Deploy en Railway (worker 24/7)
 
@@ -66,7 +64,7 @@ Pasos:
 2. Configura las mismas variables de entorno:
 	- `TELEGRAM_BOT_TOKEN`
 	- `TELEGRAM_CHAT_ID`
-	- `INSTAGRAM_USERNAME`
+	- `POST_URL` (opcional)
 3. Deploy.
 
 ## Subir a GitHub

@@ -11,11 +11,7 @@ services:
         sync: false
       - key: TELEGRAM_CHAT_ID
         sync: false
-      - key: INSTAGRAM_USERNAME
+      - key: POST_URL
         sync: false
-      - key: POLL_SECONDS
-        value: "300"
-      - key: STATE_FILE
-        value: state.json
-      - key: SEND_ON_FIRST_RUN
-        value: "false"
+      - key: TELEGRAM_MESSAGE_TEMPLATE
+        sync: false
