@@ -32,6 +32,8 @@ const state = {
   selectedTemplateText: ""
 };
 
+const SEND_BUTTON_DEFAULT_TEXT = "Enviar a Telegram";
+
 let technicalUnlocked = sessionStorage.getItem("technical_unlocked") === "1";
 
 dashboardTokenInput.value = localStorage.getItem("dashboard_token") || "";
@@ -161,18 +163,33 @@ async function sendSimpleMessage() {
     return;
   }
 
-  const result = await callApi("/.netlify/functions/dashboard-send", {
-    method: "POST",
-    body: JSON.stringify({
-      templateId,
-      postUrl
-    })
-  });
+  simpleSend.disabled = true;
+  simpleSend.textContent = "Enviando...";
 
-  if (result.status >= 200 && result.status < 300 && result.data && result.data.ok) {
-    setStatus(simpleStatus, "Mensaje enviado correctamente a Telegram.", "status-ok");
-  } else {
-    setStatus(simpleStatus, (result.data && result.data.error) || "No se pudo enviar el mensaje.", "status-danger");
+  try {
+    const result = await callApi("/.netlify/functions/dashboard-send", {
+      method: "POST",
+      body: JSON.stringify({
+        templateId,
+        postUrl
+      })
+    });
+
+    if (result.status >= 200 && result.status < 300 && result.data && result.data.ok) {
+      setStatus(simpleStatus, "Mensaje enviado correctamente a Telegram.", "status-ok");
+      simpleSend.textContent = "Enviado con exito";
+    } else {
+      setStatus(simpleStatus, (result.data && result.data.error) || "No se pudo enviar el mensaje.", "status-danger");
+      simpleSend.textContent = "Error al enviar";
+    }
+  } catch (_) {
+    setStatus(simpleStatus, "Error de red al enviar el mensaje.", "status-danger");
+    simpleSend.textContent = "Error al enviar";
+  } finally {
+    simpleSend.disabled = false;
+    window.setTimeout(() => {
+      simpleSend.textContent = SEND_BUTTON_DEFAULT_TEXT;
+    }, 2500);
   }
 }
 
