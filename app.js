@@ -24,8 +24,6 @@ const views = {
   }
 };
 
-const TECH_ACCESS_KEY = "Ni72da12";
-
 const state = {
   templates: [],
   selectedTemplateId: "",
@@ -33,8 +31,6 @@ const state = {
 };
 
 const SEND_BUTTON_DEFAULT_TEXT = "Enviar a Telegram";
-
-let technicalUnlocked = sessionStorage.getItem("technical_unlocked") === "1";
 
 dashboardTokenInput.value = localStorage.getItem("dashboard_token") || "";
 
@@ -198,17 +194,6 @@ navButtons.addEventListener("click", (event) => {
   if (!button) return;
 
   const targetView = button.getAttribute("data-view");
-  if (targetView === "technical" && !technicalUnlocked) {
-    const provided = window.prompt("Ingresa la clave para acceder a Técnico:", "") || "";
-    if (provided !== TECH_ACCESS_KEY) {
-      setStatus(simpleStatus, "Clave técnica incorrecta.", "status-danger");
-      return;
-    }
-
-    technicalUnlocked = true;
-    sessionStorage.setItem("technical_unlocked", "1");
-  }
-
   switchView(targetView);
 });
 
